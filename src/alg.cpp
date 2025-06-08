@@ -92,7 +92,7 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   if (num < 1 || num > total_perms) {
     throw std::out_of_range("Invalid permutation number");
   }
-  num--; // convert to 0-based index
+  num--;
 
   std::vector<char> result;
   std::vector<char> elements = original;
