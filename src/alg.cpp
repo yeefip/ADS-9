@@ -6,11 +6,11 @@
 #include <algorithm>
 #include "tree.h"
 
-PMTree::PMTree(const std::vector<char>& in) : original(in) {
+PMTree::PMTree(const std::vector<char>& in) {
+  original = in;
+  std::sort(original.begin(), original.end());
   root = std::make_shared<TreeNode>(0);
-  std::vector<char> sorted = original;
-  std::sort(sorted.begin(), sorted.end());
-  build(root, sorted);
+  build(root, original);
 }
 
 std::shared_ptr<TreeNode> PMTree::getRoot() const {
