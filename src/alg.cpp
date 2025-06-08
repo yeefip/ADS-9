@@ -74,7 +74,7 @@ std::vector<char> getPerm1(PMTree& tree, int num) {
   auto perms = tree.getAllPerms();
   int total = perms.size();
   if (num < 1 || num > total) {
-    throw std::out_of_range("Invalid permutation number");
+    return{};
   }
   return perms[num-1];
 }
@@ -90,7 +90,7 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   }
 
   if (num < 1 || num > total_perms) {
-    throw std::out_of_range("Invalid permutation number");
+    return{};
   }
   num--;
 
