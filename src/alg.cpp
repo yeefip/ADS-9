@@ -9,7 +9,7 @@
 PMTree::PMTree(const std::vector<char>& in) {
   original = in;
   std::sort(original.begin(), original.end());
-  root = std::make_shared<TreeNode>(0);
+  root = std::make_shared<TreeNode>('\0');  // Исправлено: используем '\0' вместо 0
   build(root, original);
 }
 
@@ -43,7 +43,7 @@ void PMTree::build(std::shared_ptr<TreeNode> node, std::vector<char> remaining) 
 void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
                           std::vector<char>& path,
                           std::vector<std::vector<char>>& result) {
-  if (node->value != 0) path.push_back(node->value);
+  if (node->value != '\0') path.push_back(node->value);  // Исправлено: проверка на '\0'
 
   if (node->children.empty()) {
     result.push_back(path);
@@ -53,7 +53,7 @@ void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
     }
   }
 
-  if (node->value != 0) path.pop_back();
+  if (node->value != '\0') path.pop_back();  // Исправлено: проверка на '\0'
 }
 
 std::vector<std::vector<char>> PMTree::getAllPerms() {
@@ -69,8 +69,9 @@ std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
 
 std::vector<char> getPerm1(PMTree& tree, int num) {
   auto perms = tree.getAllPerms();
-  if (num < 0 || num >= static_cast<int>(perms.size()))
+  if (num < 0 || num >= static_cast<int>(perms.size())) {
     throw std::out_of_range("Invalid permutation number");
+  }
   return perms[num];
 }
 
@@ -85,10 +86,10 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
     fact[i] = fact[i - 1] * i;
   }
 
-  if (num < 0 || num >= fact[n - 1] * n)
+  if (num < 0 || num >= fact[n - 1] * n) {
     throw std::out_of_range("Invalid permutation number");
+  }
 
-  std::sort(original.begin(), original.end());
   std::vector<bool> used(n, false);
 
   for (int i = n - 1; i >= 0; --i) {
