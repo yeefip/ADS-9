@@ -1,102 +1,106 @@
 // Copyright 2022 NNTU-CS
-#include <algorithm>
-#include <iostream>
+// Copyright 2022 NNTU-CS
 #include "tree.h"
+#include <vector>
+#include <memory>
+#include <stdexcept>
 
-PMTree::Node::Node(char val) : value(val) {}
-PMTree::Node::~Node() {
-    for (auto child : children) delete child;
+PMTree::PMTree(const std::vector<char>& in) : original(in) {
+    root = std::make_shared<TreeNode>(0);
+    build(root, original);
 }
 
-PMTree::PMTree(const std::vector<char>& elems) {
-    root = new Node(0);
-    build(root, elems);
-}
-
-PMTree::~PMTree() {
-    clear(root);
-}
-
-void PMTree::clear(Node* node) {
-    if (!node) return;
-    for (auto child : node->children)
-        clear(child);
-    delete node;
-}
-
-void PMTree::build(Node* node, const std::vector<char>& remaining) {
-    if (remaining.empty()) return;
-
-    std::vector<char> sorted = remaining;
-    std::sort(sorted.begin(), sorted.end());
-
-    for (size_t i = 0; i < sorted.size(); ++i) {
-        char ch = sorted[i];
-        Node* child = new Node(ch);
-        node->children.push_back(child);
-
-        std::vector<char> next_remaining = sorted;
-        next_remaining.erase(next_remaining.begin() + i);
-        build(child, next_remaining);
-    }
-}
-
-PMTree::Node* PMTree::getRoot() const {
+std::shared_ptr<TreeNode> PMTree::getRoot() const {
     return root;
 }
 
-void collectPerms(PMTree::Node* node, std::vector<char>& path, std::vector<std::vector<char>>& result) {
-    if (node->value != 0) path.push_back(node->value);
+const std::vector<char>& PMTree::getOriginal() const {
+    return original;
+}
+
+void PMTree::build(std::shared_ptr<TreeNode> node, std::vector<char> remaining) {
+    if (remaining.empty())
+        return;
+
+    for (size_t i = 0; i < remaining.size(); ++i) {
+        char ch = remaining[i];
+        auto child = std::make_shared<TreeNode>(ch);
+        node->children.push_back(child);
+
+        std::vector<char> nextRemaining = remaining;
+        nextRemaining.erase(nextRemaining.begin() + static_cast<int>(i));
+
+        build(child, nextRemaining);
+    }
+}
+
+void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
+                          std::vector<char>& path,
+                          std::vector<std::vector<char>>& result) {
+    if (node->value != 0) {
+        path.push_back(node->value);
+    }
 
     if (node->children.empty()) {
         result.push_back(path);
     } else {
-        for (auto child : node->children)
+        for (auto& child : node->children) {
             collectPerms(child, path, result);
+        }
     }
 
-    if (!path.empty()) path.pop_back();
+    if (node->value != 0) {
+        path.pop_back();
+    }
 }
 
-std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
+std::vector<std::vector<char>> PMTree::getAllPerms() {
     std::vector<std::vector<char>> result;
     std::vector<char> path;
-    collectPerms(tree.getRoot(), path, result);
+    collectPerms(root, path, result);
     return result;
 }
 
-std::vector<char> getPerm1(PMTree& tree, int num) {
-    std::vector<std::vector<char>> all = getAllPerms(tree);
-    if (num < 1 || num > (int)all.size()) return {};
-    return all[num - 1];
+std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
+    return tree.getAllPerms();
 }
 
-int factorial(int n) {
-    return (n <= 1) ? 1 : n * factorial(n - 1);
+std::vector<char> getPerm1(PMTree& tree, int num) {
+    auto perms = tree.getAllPerms();
+    if (num < 0 || num >= static_cast<int>(perms.size()))
+        throw std::out_of_range("Invalid permutation number");
+
+    return perms[num];
 }
 
 std::vector<char> getPerm2(PMTree& tree, int num) {
     std::vector<char> result;
-    PMTree::Node* current = tree.getRoot();
-    --num;
+    std::vector<char> original = tree.getOriginal();
+    int n = static_cast<int>(original.size());
 
-    std::vector<char> used;
-    std::vector<char> alphabet;
+    std::vector<int> fact(n);
+    fact[0] = 1;
+    for (int i = 1; i < n; ++i) {
+        fact[i] = fact[i - 1] * i;
+    }
 
-    for (auto child : current->children)
-        alphabet.push_back(child->value);
+    std::vector<bool> used(n, false);
+    for (int i = n - 1; i >= 0; --i) {
+        int f = fact[i];
+        int index = num / f;
+        num %= f;
 
-    std::sort(alphabet.begin(), alphabet.end());
-
-    while (!alphabet.empty()) {
-        int block_size = factorial(alphabet.size() - 1);
-        int index = num / block_size;
-        if (index >= (int)alphabet.size()) return {};
-
-        char ch = alphabet[index];
-        result.push_back(ch);
-        alphabet.erase(alphabet.begin() + index);
-        num %= block_size;
+        int count = 0;
+        for (int j = 0; j < n; ++j) {
+            if (!used[j]) {
+                if (count == index) {
+                    result.push_back(original[j]);
+                    used[j] = true;
+                    break;
+                }
+                ++count;
+            }
+        }
     }
 
     return result;
