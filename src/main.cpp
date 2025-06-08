@@ -2,6 +2,7 @@
 #include <iostream>
 #include <chrono>
 #include <random>
+#include <vector>
 #include "tree.h"
 
 void printVector(const std::vector<char>& v) {
@@ -29,7 +30,9 @@ int main() {
     for (int i = 0; i < n; ++i) chars.push_back('a' + i);
     PMTree t(chars);
     int maxPerms = factorial(n);
-    int randNum = rand() % maxPerms;
+    unsigned int seed = static_cast<unsigned int>(
+    std::chrono::system_clock::now().time_since_epoch().count());
+    int randNum = rand_r(&seed) % maxPerms;
 
     auto start1 = std::chrono::high_resolution_clock::now();
     auto p1 = getPerm1(t, randNum);
@@ -39,10 +42,16 @@ int main() {
     auto p2 = getPerm2(t, randNum);
     auto end2 = std::chrono::high_resolution_clock::now();
 
-    auto dur1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1).count();
-    auto dur2 = std::chrono::duration_cast<std::chrono::microseconds>(end2 - start2).count();
+    auto dur1 = std::chrono::duration_cast<std::chrono::microseconds>(
+    end1 - start1)
+    .count();
+    auto dur2 = std::chrono::duration_cast<std::chrono::microseconds>(
+    end2 - start2)
+    .count();
 
-    std::cout << "n = " << n << " | getPerm1 = " << dur1 << " мкс | getPerm2 = " << dur2 << " мкс\n";
+    std::cout << "n = " << n
+          << " | getPerm1 = " << dur1 << " мкс"
+          << " | getPerm2 = " << dur2 << " мкс\n";
   }
 
   return 0;
