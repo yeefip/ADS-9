@@ -1,9 +1,8 @@
 // Copyright 2022 NNTU-CS
-// Copyright 2022 NNTU-CS
-#include "tree.h"
-#include <vector>
-#include <memory>
 #include <stdexcept>
+#include <memory>
+#include <vector>
+#include "tree.h"
 
 PMTree::PMTree(const std::vector<char>& in) : original(in) {
     root = std::make_shared<TreeNode>(0);
@@ -18,28 +17,26 @@ const std::vector<char>& PMTree::getOriginal() const {
     return original;
 }
 
-void PMTree::build(std::shared_ptr<TreeNode> node, std::vector<char> remaining) {
-    if (remaining.empty())
-        return;
+void PMTree::build(std::shared_ptr<TreeNode> node,
+                   std::vector<char> remaining) {
+    if (remaining.empty()) return;
 
     for (size_t i = 0; i < remaining.size(); ++i) {
         char ch = remaining[i];
         auto child = std::make_shared<TreeNode>(ch);
         node->children.push_back(child);
 
-        std::vector<char> nextRemaining = remaining;
-        nextRemaining.erase(nextRemaining.begin() + static_cast<int>(i));
-
-        build(child, nextRemaining);
+        std::vector<char> nextRem = remaining;
+        nextRem.erase(nextRem.begin() + static_cast<int>(i));
+        build(child, nextRem);
     }
 }
 
-void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
-                          std::vector<char>& path,
-                          std::vector<std::vector<char>>& result) {
-    if (node->value != 0) {
-        path.push_back(node->value);
-    }
+void PMTree::collectPerms(
+    std::shared_ptr<TreeNode> node,
+    std::vector<char>& path,
+    std::vector<std::vector<char>>& result) {
+    if (node->value != 0) path.push_back(node->value);
 
     if (node->children.empty()) {
         result.push_back(path);
@@ -49,9 +46,7 @@ void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
         }
     }
 
-    if (node->value != 0) {
-        path.pop_back();
-    }
+    if (node->value != 0) path.pop_back();
 }
 
 std::vector<std::vector<char>> PMTree::getAllPerms() {
@@ -67,33 +62,31 @@ std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
 
 std::vector<char> getPerm1(PMTree& tree, int num) {
     auto perms = tree.getAllPerms();
-    if (num < 0 || num >= static_cast<int>(perms.size()))
+    if (num < 0 || num >= static_cast<int>(perms.size())) {
         throw std::out_of_range("Invalid permutation number");
-
+    }
     return perms[num];
 }
 
 std::vector<char> getPerm2(PMTree& tree, int num) {
     std::vector<char> result;
-    std::vector<char> original = tree.getOriginal();
+    auto original = tree.getOriginal();
     int n = static_cast<int>(original.size());
 
     std::vector<int> fact(n);
     fact[0] = 1;
-    for (int i = 1; i < n; ++i) {
-        fact[i] = fact[i - 1] * i;
-    }
+    for (int i = 1; i < n; ++i) fact[i] = fact[i - 1] * i;
 
     std::vector<bool> used(n, false);
     for (int i = n - 1; i >= 0; --i) {
         int f = fact[i];
-        int index = num / f;
+        int idx = num / f;
         num %= f;
 
         int count = 0;
         for (int j = 0; j < n; ++j) {
             if (!used[j]) {
-                if (count == index) {
+                if (count == idx) {
                     result.push_back(original[j]);
                     used[j] = true;
                     break;
@@ -102,6 +95,5 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
             }
         }
     }
-
     return result;
 }
