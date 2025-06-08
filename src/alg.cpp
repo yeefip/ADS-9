@@ -9,7 +9,7 @@
 PMTree::PMTree(const std::vector<char>& in) {
   original = in;
   std::sort(original.begin(), original.end());
-  root = std::make_shared<TreeNode>('\0');  // Исправлено: используем '\0' вместо 0
+  root = std::make_shared<TreeNode>('\0');
   build(root, original);
 }
 
@@ -43,7 +43,7 @@ void PMTree::build(std::shared_ptr<TreeNode> node, std::vector<char> remaining) 
 void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
                           std::vector<char>& path,
                           std::vector<std::vector<char>>& result) {
-  if (node->value != '\0') path.push_back(node->value);  // Исправлено: проверка на '\0'
+  if (node->value != '\0') path.push_back(node->value);
 
   if (node->children.empty()) {
     result.push_back(path);
@@ -53,7 +53,7 @@ void PMTree::collectPerms(std::shared_ptr<TreeNode> node,
     }
   }
 
-  if (node->value != '\0') path.pop_back();  // Исправлено: проверка на '\0'
+  if (node->value != '\0') path.pop_back();
 }
 
 std::vector<std::vector<char>> PMTree::getAllPerms() {
