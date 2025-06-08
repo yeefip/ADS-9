@@ -72,10 +72,11 @@ std::vector<std::vector<char>> getAllPerms(PMTree& tree) {
 
 std::vector<char> getPerm1(PMTree& tree, int num) {
   auto perms = tree.getAllPerms();
-  if (num < 0 || num >= static_cast<int>(perms.size())) {
+  int total = perms.size();
+  if (num < 1 || num > total) {
     throw std::out_of_range("Invalid permutation number");
   }
-  return perms[num];
+  return perms[num-1];
 }
 
 std::vector<char> getPerm2(PMTree& tree, int num) {
@@ -83,44 +84,32 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   int n = original.size();
   if (n == 0) return {};
 
-  std::vector<int> fact(n);
-  fact[0] = 1;
-  for (int i = 1; i < n; ++i) {
-    fact[i] = fact[i-1] * i;
+  int total_perms = 1;
+  for (int i = 2; i <= n; ++i) {
+    total_perms *= i;
   }
 
-  if (num < 0 || num >= fact[n-1] * n) {
+  if (num < 1 || num > total_perms) {
     throw std::out_of_range("Invalid permutation number");
   }
+  num--; // convert to 0-based index
 
   std::vector<char> result;
-  std::vector<bool> used(n, false);
+  std::vector<char> elements = original;
 
-  for (int i = n-1; i >= 0; --i) {
-    int f = fact[i];
-    int pos = num / f;
-    num %= f;
+  for (int i = n; i > 0; --i) {
+    total_perms /= i;
+    int index = num / total_perms;
+    num %= total_perms;
 
-    for (int j = 0; j < n; ++j) {
-      if (!used[j]) {
-        if (pos == 0) {
-          result.push_back(original[j]);
-          used[j] = true;
-          break;
-        }
-        pos--;
-      }
-    }
+    result.push_back(elements[index]);
+    elements.erase(elements.begin() + index);
   }
 
   return result;
 }
 
 int factorial(int n) {
-  if (n < 0) return 0;
-  int result = 1;
-  for (int i = 2; i <= n; ++i) {
-    result *= i;
-  }
-  return result;
+  if (n <= 1) return 1;
+  return n * factorial(n-1);
 }
