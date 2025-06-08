@@ -20,7 +20,7 @@ const std::vector<char>& PMTree::getOriginal() const {
   return original;
 }
 
-void PMTree::build(std::shared_ptr<TreeNode> node, 
+void PMTree::build(std::shared_ptr<TreeNode> node,
                   std::vector<char> remaining) {
   if (remaining.empty()) return;
 
